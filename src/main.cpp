@@ -44,10 +44,13 @@ int main()
   uWS::Hub h;
 
   PID pid;
+  //pid.Init(0.02, 0.0004, 0.3)
+  //pid.Init(0.03, 0.0, 0.02);
+  pid.Init(0.03, 0.000005, 0.02);
   // TODO: Initialize the pid variable.
-  
+  int n = 0;
 
-  h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  h.onMessage([&](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -57,12 +60,20 @@ int main()
       if (s.str() != "") {
         auto j = json::parse(s);
         std::string event = j[0].get<std::string>();
+		std::cout << "STEP: " << n << std::endl;
         if (event == "telemetry") {
+			/*if (++n > 10)
+			{
+				std::string msg = "42[\"reset\",{}]";
+				(ws).send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+				n = 0;
+			}*/
           // j[1] is the data JSON object
           double cte = std::stod(j[1]["cte"].get<std::string>());
           double speed = std::stod(j[1]["speed"].get<std::string>());
           double angle = std::stod(j[1]["steering_angle"].get<std::string>());
-          double steer_value;
+		  pid.UpdateError(cte);
+		  double steer_value = pid.TotalError();
           /*
           * TODO: Calcuate steering value here, remember the steering value is
           * [-1, 1].
