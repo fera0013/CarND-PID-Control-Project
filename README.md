@@ -92,3 +92,22 @@ that's just a guess.
 
 One last note here: regardless of the IDE used, every submitted project must
 still be compilable with cmake and make./
+
+## Solution
+
+I started with a low speed and just the proportional constant, to find a good value 
+for the proportional correction of the CTE. [Video 1](https://github.com/fera0013/CarND-PID-Control-Project/blob/master/videos/t0_1p0_1i0d0s.webm) shows,
+that a proportional value of 0.1 is sufficient to drive the car safely around the complete 
+track with some minimal and temporary oscillation. 
+With a higher throttle value of 0.2 and with the initial proportional value of 0.1, the oscillation increases considerably 
+to a point at which the car completely runs of the track, as can be seen in [Video 2](https://github.com/fera0013/CarND-PID-Control-Project/blob/master/videos/t0_2p0_1i0d0f.webm).
+The problem of an oscillation that builds up over time can be mitigated by the addition of a differential component.  [Video 3](https://github.com/fera0013/CarND-PID-Control-Project/blob/master/videos/t0_2p0_1i0d3s.webm) shows the significant effect of a differential value of 3, in combination with otherwise 
+unchanged parameters: The car steers much more abruptly, rarely overshoots and makes it safely around the track. 
+Even at a speed of 30 mph, the combination of a proportional component of 0.1 and a differential component of 3 still steers 
+the car safely around the track. The driving experience is however much more unstable, as [video 4](https://github.com/fera0013/CarND-PID-Control-Project/blob/master/videos/t0_3p0_1i0d3s.webm)  shows.
+
+It should be noted that the addition of an integral component did not help in combination with the chosen parameters. 
+This is however not surprising, since the simplified simulation model does not seem to contain any systematic bias. 
+
+
+
