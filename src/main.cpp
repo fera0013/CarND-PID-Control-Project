@@ -40,13 +40,22 @@ std::stringstream hasData(std::string s) {
 
 int main()
 {
-
+	
   uWS::Hub h;
-
   PID pid;
-  pid.Init(0.05, 0.00008, 0.03);
-  // TODO: Initialize the pid variable.
-  int n = 0;
+  double throttle;
+  double p;
+  double i;
+  double d;
+  std::cout << "Enter throttle: " << std::endl;
+  std::cin >> throttle;
+  std::cout << "Enter p constant: " << std::endl;
+  std::cin >> p;
+  std::cout << "Enter i constant: " << std::endl;
+  std::cin >> i;
+  std::cout << "Enter d constant: " << std::endl;
+  std::cin >> d;
+  pid.Init(p, i, d);
 
   h.onMessage([&](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -58,14 +67,7 @@ int main()
       if (s.str() != "") {
         auto j = json::parse(s);
         std::string event = j[0].get<std::string>();
-		std::cout << "STEP: " << n << std::endl;
         if (event == "telemetry") {
-			/*if (++n > 10)
-			{
-				std::string msg = "42[\"reset\",{}]";
-				(ws).send(msg.data(), msg.length(), uWS::OpCode::TEXT);
-				n = 0;
-			}*/
           // j[1] is the data JSON object
           double cte = std::stod(j[1]["cte"].get<std::string>());
           double speed = std::stod(j[1]["speed"].get<std::string>());
@@ -78,23 +80,20 @@ int main()
           * NOTE: Feel free to play around with the throttle and speed. Maybe use
           * another PID controller to control the speed!
           */
-
-
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
-
           json msgJson;
           msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = 0.1;
+          msgJson["throttle"] = throttle;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           std::cout << msg << std::endl;
-          (ws).send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+          ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }
       }
       else {
         // Manual driving
         std::string msg = "42[\"manual\",{}]";
-        (ws).send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+        ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
       }
     }
   });
@@ -104,7 +103,7 @@ int main()
   });
 
   h.onDisconnection([&h](uWS::WebSocket<uWS::SERVER> ws, int code, char *message, size_t length) {
-    (ws).close();
+    ws.close();
     std::cout << "Disconnected" << std::endl;
   });
 

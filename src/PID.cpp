@@ -20,8 +20,8 @@ void PID::Init(double Kp, double Ki, double Kd) {
 }
 
 void PID::UpdateError(double cte) {
+	this->d_error = cte - this->p_error;
 	this->p_error = cte;
-	this->d_error = cte - this->d_error;
 	this->i_error += cte;
 }
 
